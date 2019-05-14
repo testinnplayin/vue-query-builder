@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import sinon from 'sinon';
+import sinon, { SinonStub } from 'sinon';
 import { mount, Wrapper } from '@vue/test-utils';
 import Vue from 'vue';
 
@@ -8,6 +8,8 @@ import { POPOVER_ALIGN, POPOVER_SHADOW_GAP } from '@/lib/popover';
 
 describe('Popover', function() {
   let clock: any = undefined;
+  let bodyBoundingClientRectStub: SinonStub<[], DOMRect | ClientRect>;
+  let parentBoundingClientRectStub: SinonStub<[], DOMRect | ClientRect>;
   var wrapper: Wrapper<Vue>;
   var popoverWrapper: Wrapper<Vue>;
   jest.useFakeTimers();
@@ -66,11 +68,25 @@ describe('Popover', function() {
 
   beforeEach(function() {
     jest.useFakeTimers();
+    bodyBoundingClientRectStub = sinon.stub(document.body, 'getBoundingClientRect');
+    bodyBoundingClientRectStub.returns({
+      x: 0,
+      y: 0,
+      width: 1024,
+      height: 768,
+      top: 0,
+      left: 0,
+      bottom: 768,
+      right: 1024,
+      toJSON: () => ''
+    });
+
     // clock = sinon.useFakeTimers();
   });
 
   afterEach(function() {
     wrapper.destroy();
+    bodyBoundingClientRectStub.restore();
     // clock.restore();
   });
 
@@ -124,12 +140,26 @@ describe('Popover', function() {
         },
       });
       return wrapper.vm.$nextTick().then(() => {
+        parentBoundingClientRectStub = sinon.stub(wrapper.element, 'getBoundingClientRect')
+        parentBoundingClientRectStub.returns({
+          x: 200,
+          y: 200,
+          width: 100,
+          height: 200,
+          top: 200,
+          left: 200,
+          bottom: 768 - 200 - 200,
+          right: 1024 - 200 + 100,
+          toJSON: () => ''
+        })
+        const popoverWrapperVm: Vue = popoverWrapper.vm;
+        popoverWrapperVm.updatePosition();
         const parentBounds = wrapper.element.getBoundingClientRect();
         console.log('parentBounds =>', parentBounds);
         const popoverBounds = popoverWrapper.element.getBoundingClientRect();
         console.log('popoverBounds =>', popoverBounds);
 
-        return expect(popoverBounds.top).toEqual(parentBounds.top - POPOVER_SHADOW_GAP - 140);
+        return expect(popoverWrapper.element.offsetTop).toEqual(wrapper.element.offsetTop + - POPOVER_SHADOW_GAP - 140);
       });
     });
 
@@ -152,9 +182,7 @@ describe('Popover', function() {
       });
 
       return wrapper.vm.$nextTick().then(() => {
-        const parentBounds = wrapper.element.getBoundingClientRect();
-        const popoverBounds = popoverWrapper.element.getBoundingClientRect();
-        expect(popoverBounds.left).toEqual(parentBounds.left + (100 - 140) / 2);
+        expect(popoverWrapper.element.clientWidth).toEqual(wrapper.element.clientWidth + (100 - 140) / 2);
       });
     });
   });
