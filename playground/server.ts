@@ -6,12 +6,15 @@ import csv from 'csvtojson';
 
 import meow from 'meow';
 
+import { startMongo } from './mongodb';
+
 type ServerConfig = {
   dburi: string;
   dbname: string;
-  port: number;
+  httpPort: number;
   defaultCollection: string;
   reset: boolean;
+  automongo: boolean;
   defaultDataset: string;
 };
 
@@ -195,6 +198,9 @@ function parseCommandLine() {
     --reset               reset default collection, override "reset" option from config file,
                           default is false
 
+    --automongo           download (only the first time) and execute a local, ephemeral,
+                          mongo server. If present, "--dburi" is ignored.
+
     --defaultDataset      path to dataset to load in database
                           default is ${__dirname}/default-dataset.csv
 
@@ -230,6 +236,10 @@ function parseCommandLine() {
           type: 'boolean',
           default: false,
         },
+        automongo: {
+          type: 'boolean',
+          default: false,
+        },
         defaultDataset: {
           type: 'string',
           alias: 'D',
@@ -248,9 +258,10 @@ function parseCommandLine() {
     'dburi',
     'defaultCollection',
     'reset',
+    'automongo',
     'defaultDataset',
   ]) {
-    const envVar = `VQB_PLAYGROUND_{opt.toUpperCase()}`;
+    const envVar = `VQB_PLAYGROUND_${opt.toUpperCase()}`;
     if (cli.flags[opt]) {
       config[opt] = cli.flags[opt];
     } else if (process.env[envVar]) {
@@ -260,7 +271,20 @@ function parseCommandLine() {
   return config;
 }
 
+function start(config: ServerConfig) {
+  setupApp(config).listen(config.httpPort, function() {
+    console.log(`VQB playground app listening on port ${config.httpPort}!`);
+  });
+}
+
 const config = parseCommandLine();
-setupApp(config).listen(config.httpPort, function() {
-  console.log(`VQB playground app listening on port ${config.httpPort}!`);
-});
+if (config.automongo) {
+  startMongo(config).then(({ tmpdir }) => {
+    process.on('exit', () => {
+      tmpdir.removeCallback();
+    });
+    start(config);
+  });
+} else {
+  start(config);
+}
