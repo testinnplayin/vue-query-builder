@@ -25,7 +25,6 @@ import Vue from 'vue';
 import { Component, Prop } from 'vue-property-decorator';
 import { Mutation } from 'vuex-class';
 import { PipelineStep } from '@/lib/steps';
-import { VQBState } from '@/store/state';
 
 @Component({
   name: 'step',
