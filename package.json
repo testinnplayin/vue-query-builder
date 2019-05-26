@@ -13,9 +13,8 @@
     "playground": "concurrently \"yarn:build-bundle --watch\" \"yarn:playground:build-app --watch\" \"yarn:playground:build-server --watch\" \"node playground/server.js\"",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "storybook:bundle": "rollup -c .storybook/rollup.config.js",
-    "test:unit": "rollup -c tests/rollup.config.test.js && karma start --single-run",
-    "karma": "karma start --single-run",
-    "tdd": "concurrently \"rollup --watch -c tests/rollup.config.test.js\"  \"karma start --single-run --auto-watch\""
+    "test:unit": "karma start --single-run",
+    "tdd": "karma start"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",
@@ -61,7 +60,6 @@
     "rollup-plugin-commonjs": "^9.2.1",
     "rollup-plugin-css-only": "^1.0.0",
     "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-multi-entry": "^2.1.0",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.0.1",
     "rollup-plugin-replace": "^2.2.0",
