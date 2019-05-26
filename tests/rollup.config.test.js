@@ -7,6 +7,7 @@ const typescript = require('rollup-plugin-typescript');
 const vue = require('rollup-plugin-vue');
 const json = require('rollup-plugin-json');
 const replace = require('rollup-plugin-replace');
+const istanbul = require('rollup-plugin-istanbul');
 
 module.exports = {
   input: 'tests/unit/karma-test-suite.ts',
@@ -43,5 +44,8 @@ module.exports = {
           isProduction: true
         }
       }),
+      istanbul({
+        exclude: ['test/**/*.ts'],
+      })
     ]
 };
