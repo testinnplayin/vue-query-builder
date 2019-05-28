@@ -18,13 +18,6 @@ const baseConfig = {
     sourcemap: 'inline',
   },
   plugins: [
-    commonjs({
-      namedExports: {
-        mathjs: ['parse'],
-        '@vue/test-utils': ['createLocalVue', 'mount', 'shallowMount'],
-        chai: ['expect'],
-      },
-    }),
     json(),
     resolve(),
     typescript({ module: 'es2015' }),
@@ -32,13 +25,13 @@ const baseConfig = {
       resolve: ['.vue', '.json'],
       '@': __dirname + '/../src',
     }),
-    // commonjs({
-    //   namedExports: {
-    //     mathjs: ['parse'],
-    //     '@vue/test-utils': ['createLocalVue', 'mount', 'shallowMount'],
-    //     chai: ['expect'],
-    //   },
-    // }),
+    commonjs({
+      namedExports: {
+        mathjs: ['parse'],
+        '@vue/test-utils': ['createLocalVue', 'mount', 'shallowMount'],
+        chai: ['expect'],
+      },
+    }),
     css({ output: 'dist/vue-query-builder.css' }),
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'),
